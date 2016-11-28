@@ -120,7 +120,7 @@ int List_update_element(List* list, unsigned int index, void* element) {
 	
 	Iterator* iterator = list->_firstIterator;
 		
-	int i = 0;
+	unsigned int i = 0;
 	for (; i < index; i++) {
 		iterator = iterator->_nextIterator;
 	}
