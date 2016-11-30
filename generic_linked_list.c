@@ -27,7 +27,6 @@ Iterator* Iterator_remove_and_next(Iterator* iterator) {
 
 	// Deleting iterator:
 	free(iterator);
-	iterator = NULL;
 	
 	return nextIterator;
 }
@@ -169,7 +168,6 @@ void List_remove_all(List* list) {
 			
 			// Free iterator
 			free(iteratorToFree);
-			iteratorToFree = NULL;
 		}
 	}
 	
@@ -192,11 +190,9 @@ void List_remove_and_free_all(List* list) {
 			
 			// Free element
 			free(iteratorToFree->_element);
-			iteratorToFree->_element = NULL;
 			
 			// Free iterator
 			free(iteratorToFree);
-			iteratorToFree = NULL;
 		}
 	}
 	
