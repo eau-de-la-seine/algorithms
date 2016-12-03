@@ -1,5 +1,6 @@
-#include <stdlib.h> // malloc and free
 #include "generic_linked_list.h"
+/* For malloc() and free() */
+#include <stdlib.h>
 
 
 void* Iterator_get(Iterator* iterator) {
@@ -17,15 +18,15 @@ Iterator* Iterator_next(Iterator* iterator) {
 Iterator* Iterator_remove_and_next(Iterator* iterator) {
 	--iterator->_parentList->_nb;
 
-	// Attach previous and next nodes
+	/* Attach previous and next nodes */
 	if (iterator->_previousIterator != NULL && iterator->_nextIterator != NULL) {
 		iterator->_previousIterator->_nextIterator = iterator->_nextIterator;
 	}
 	
-	// Prepare result
+	/* Prepare result */
 	Iterator* nextIterator = iterator->_nextIterator;
 
-	// Deleting iterator:
+	/* Deleting iterator: */
 	free(iterator);
 	
 	return nextIterator;
@@ -53,7 +54,7 @@ List List_make(){
 
 
 
-int List_size(List* list) {
+size_t List_size(List* list) {
 	return list->_nb;
 }
 
@@ -79,12 +80,12 @@ void* List_get_element(List* list, unsigned int index) {
 int List_add_element(List* list, void* element) {
 	Iterator* newIterator = (Iterator*) malloc(sizeof(*newIterator));
 	
-	// If malloc failed
+	/* If malloc failed */
 	if(newIterator == NULL) {
 		return 0;
 	}
 
-	// Init iterator fields
+	/* Init iterator fields */
 	newIterator->_element = element;
 	newIterator->_nextIterator = NULL;
 	newIterator->_previousIterator = NULL;
@@ -93,12 +94,12 @@ int List_add_element(List* list, void* element) {
 	newIterator->next = Iterator_next;
 	newIterator->removeAndNext = Iterator_remove_and_next;
 
-	// If we don't have any element in the list
+	/* If we don't have any element in the list */
 	if(list->_nb == 0) {
 		list->_firstIterator = newIterator;
 		list->_lastIterator = newIterator;
 	}
-	// Else (there's already element(s) in the list)
+	/* Else (there's already element(s) in the list) */
 	else {
 		newIterator->_previousIterator = list->_lastIterator;
 		list->_lastIterator->_nextIterator = newIterator;
@@ -124,7 +125,7 @@ int List_update_element(List* list, unsigned int index, void* element) {
 		iterator = iterator->_nextIterator;
 	}
 	
-	// Overwrite element:
+	/* Overwrite element: */
 	iterator->_element = element;
 	
 	return 1;
@@ -144,10 +145,10 @@ int List_update_element(List* list, unsigned int index, void* element) {
 		iterator = iterator->_nextIterator;
 	}
 	
-	// Prepare result
+	/* Prepare result */
 	void* removedElement = iterator->_element;
 	
-	// Deleting iterator (decrementation is done in removeAndNext):
+	/* Deleting iterator (decrementation is done in removeAndNext): */
 	iterator->removeAndNext(iterator);
 	
 	return removedElement;
@@ -163,15 +164,15 @@ void List_remove_all(List* list) {
 		for (; i < list->_nb; i++) {
 			Iterator* iteratorToFree = iterator;
 			
-			// Update iterator's reference
+			/* Update iterator's reference */
 			iterator = iterator->_nextIterator;
 			
-			// Free iterator
+			/* Free iterator */
 			free(iteratorToFree);
 		}
 	}
 	
-	// Reinite list size
+	/* Reinite list size */
 	list->_nb = 0;
 }
 
@@ -185,18 +186,18 @@ void List_remove_and_free_all(List* list) {
 		for (; i < list->_nb; i++) {
 			Iterator* iteratorToFree = iterator;
 			
-			// Update iterator's reference
+			/* Update iterator's reference */
 			iterator = iterator->_nextIterator;
 			
-			// Free element
+			/* Free element */
 			free(iteratorToFree->_element);
 			
-			// Free iterator
+			/* Free iterator */
 			free(iteratorToFree);
 		}
 	}
 	
-	// Reinite list size
+	/* Reinite list size */
 	list->_nb = 0;
 }
 

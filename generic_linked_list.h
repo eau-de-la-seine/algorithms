@@ -1,6 +1,9 @@
 #ifndef GENERIC_LINKED_LIST_H
 #define GENERIC_LINKED_LIST_H
 
+/* For size_t */
+#include <stddef.h>
+
 
 /**
  * An iterator represents a container which has the element and a pointer on the next container
@@ -29,7 +32,9 @@ struct Iterator {
 	 */
 	List* _parentList;
 	
-	// Methods
+	/**
+	 * Methods
+	 */
 	void* (*get) (Iterator* iterator);
 	Iterator* (*next) (Iterator* iterator);
 	Iterator* (*removeAndNext) (Iterator* iterator);
@@ -41,7 +46,7 @@ struct List {
 	/**
 	 * Number of elements in the list, 0 if the list is empty
 	 */
-	unsigned int _nb;
+	size_t _nb;
 	
 	/**
 	 * First element in the list, useful for browsing elements from there
@@ -53,8 +58,10 @@ struct List {
 	 */
 	Iterator* _lastIterator;
 	
-	// Methods, see {@link List_make()} for function pointer refences
-	int (*size) (List* list);
+	/*
+	 * Methods, see {@link List_make()} for function pointer refences
+	 */
+	size_t (*size) (List* list);
 	void* (*get) (List* list, unsigned int index);
 	int (*add) (List* list, void *element);
 	int (*update) (List* list, unsigned int index, void *element);
@@ -108,7 +115,7 @@ List List_make();
  * @param list		Current list
  * @return 			List's size
  */
-int List_size(List* list);
+size_t List_size(List* list);
 
 
 /**
