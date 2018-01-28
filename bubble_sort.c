@@ -1,5 +1,5 @@
 /**
- * Bubble sort (tri à bulle)
+ * Bubble sort (tri Ã  bulle)
  *
  * Wikipedia: https://en.wikipedia.org/wiki/Bubble_sort
  * 
@@ -38,12 +38,12 @@
  *
  * @author Gokan EKINCI
  */
-void bubble_sort(int tab[], int lastIndex){
+void bubble_sort(int tab[], int lastIndex) {
     int ordered = 0, temp, i;
-	while(!ordered){
-		for(i = 0; i < lastIndex; i++){
+	while (!ordered) {
+		for (i = 0; i < lastIndex; i++) {
 			// swap
-			if(tab[i] > tab[i+1]) {
+			if (tab[i] > tab[i+1]) {
 				temp = tab[i];
 				tab[i] = tab[i+1];
 				tab[i+1] = temp;
@@ -52,7 +52,7 @@ void bubble_sort(int tab[], int lastIndex){
 		
 		--lastIndex;
 		
-		if(lastIndex == 1) {
+		if (lastIndex == 1) {
 			ordered = 1;
 		}
 	}
