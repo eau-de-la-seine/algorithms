@@ -39,7 +39,7 @@
  * @author Gokan EKINCI
  */
 void bubble_sort(int tab[], int lastIndex) {
-    int ordered = 0, temp, i;
+	int ordered = 0, temp, i;
 	while (!ordered) {
 		for (i = 0; i < lastIndex; i++) {
 			// swap
@@ -49,9 +49,9 @@ void bubble_sort(int tab[], int lastIndex) {
 				tab[i+1] = temp;
 			}
 		}
-		
+
 		--lastIndex;
-		
+
 		if (lastIndex == 1) {
 			ordered = 1;
 		}

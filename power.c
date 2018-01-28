@@ -15,11 +15,11 @@
  * @author Gokan EKINCI
  */
 int power(int number, int pow) {
-    int j = 1;
-	for(int i = 0; i < pow; i++){
-	    j = j * number;
-    }
+	int j = 1;
+	for (int i = 0; i < pow; i++) {
+		j = j * number;
+	}
 
-    return j;
+	return j;
 }
 	
