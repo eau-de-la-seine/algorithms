@@ -22,9 +22,7 @@ Iterator* Iterator_next(Iterator* iterator) {
 
 
 Iterator* Iterator_remove_and_next(Iterator* iterator) {
-	/* Prepare result */
-	Iterator* nextIterator = iterator->_nextIterator;
-
+	Iterator* nextIterator = NULL;
 	--iterator->_parentList->_nb;
 
 	/* Attach previous and next nodes */
@@ -32,9 +30,12 @@ Iterator* Iterator_remove_and_next(Iterator* iterator) {
 		iterator->_previousIterator->_nextIterator = iterator->_nextIterator;
 	}
 
+	/* Prepare result */
+	nextIterator = iterator->_nextIterator;
+
 	/* Deleting iterator: */
 	free(iterator);
-	
+
 	return nextIterator;
 }
 
@@ -114,7 +115,7 @@ int List_add_element(List* list, void* element) {
 		list->_lastIterator = newIterator;
 	}
 	
-	++list->_nb;
+	list->_nb = list->_nb + 1;
 	
 	return 1;
 }
@@ -169,21 +170,21 @@ int List_update_element(List* list, unsigned int index, void* element) {
 
 void List_remove_all(List* list) {
 	if (list->_nb != 0) {
-		Iterator* iterator = list->_firstIterator;
+		Iterator* currentIterator = list->_firstIterator;
 			
 		unsigned int i = 0;
 		for (; i < list->_nb; i++) {
-			Iterator* iteratorToFree = iterator;
+			Iterator* iteratorToFree = currentIterator;
 			
 			/* Update iterator's reference */
-			iterator = iterator->_nextIterator;
+			currentIterator = currentIterator->_nextIterator;
 			
 			/* Free iterator */
 			free(iteratorToFree);
 		}
 	}
 	
-	/* Reinite list size */
+	/* Reset list size */
 	list->_nb = 0;
 }
 
@@ -191,14 +192,14 @@ void List_remove_all(List* list) {
 
 void List_remove_and_free_all(List* list) {
 	if (list->_nb != 0) {
-		Iterator* iterator = list->_firstIterator;
+		Iterator* currentIterator = list->_firstIterator;
 			
 		unsigned int i = 0;
 		for (; i < list->_nb; i++) {
-			Iterator* iteratorToFree = iterator;
+			Iterator* iteratorToFree = currentIterator;
 			
 			/* Update iterator's reference */
-			iterator = iterator->_nextIterator;
+			currentIterator = currentIterator->_nextIterator;
 			
 			/* Free element */
 			free(iteratorToFree->_element);
@@ -208,7 +209,7 @@ void List_remove_and_free_all(List* list) {
 		}
 	}
 	
-	/* Reinite list size */
+	/* Reset list size */
 	list->_nb = 0;
 }
 

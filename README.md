@@ -102,3 +102,6 @@ Some functions and libraries I have created myself during my studies
         return 0;
     }
 
+Compiled with:
+
+    gcc -Wall -Wextra -ansi -pedantic -fsanitize=leak -fno-omit-frame-pointer ../generic_linked_list.c main.c -o list
