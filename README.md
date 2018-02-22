@@ -37,64 +37,68 @@ Some functions and libraries I have created myself during my studies
 
 
     #include "generic_linked_list.h"
-    #include <stdio.h> // for printf
-    
+    #include <stdio.h>
+
     int main(void) {
         List list = List_make();
         int i1 = 123, i2 = 456, i3 = 789, i4 = 321, i5 = 654, i6 = 987;
-    
-        // add + get
+        Iterator* ite = NULL;
+
+        /* add + get */
         list.add(&list, &i1);
         list.add(&list, &i2);
         list.add(&list, &i3);
         printf("%d\n", *(int*) list.get(&list, 0));
         printf("%d\n", *(int*) list.get(&list, 1));
         printf("%d\n", *(int*) list.get(&list, 2));
-    
-        // update + get
+
+        /* update + get */
         list.update(&list, 0, &i4);
         list.update(&list, 1, &i5);
         list.update(&list, 2, &i6);
         printf("%d\n", *(int*) list.get(&list, 0));
         printf("%d\n", *(int*) list.get(&list, 1));
         printf("%d\n", *(int*) list.get(&list, 2));
-	
-        // remove + size
-        list.remove(&list, 3); // tried with 0, 1, 2, 3
-        printf("%d\n", list.size(&list));
-    
-        // removeAll + size
+
+        /* remove + size */
+        /* tried with 0, 1, 2, 3 */
+        list.remove(&list, 3);
+        printf("%lu\n", list.size(&list));
+
+        /* removeAll + size */
         list.removeAll(&list);
-        printf("%d\n", list.size(&list));
+        printf("%lu\n", list.size(&list));
         
-        // Iterator
+        /* Iterator */
         printf("\n\nIterate: \n");
         list.add(&list, &i1);
         list.add(&list, &i2);
         list.add(&list, &i3);
-	
-        // Iterator loop pattern
-        for (Iterator* it = list.iterator(&list); it != NULL; it = it->next(it)) {
-            printf("%d\n", *(int*) it->get(it));
+
+        /* Iterator loop pattern */
+        ite = list.iterator(&list);
+        for (; ite->hasNext(ite); ite = ite->next(ite)) {
+            printf("%d\n", *(int*) ite->get(ite));
         }
 
-        // Iterator loop with remove pattern
-        Iterator* ite = list.iterator(&list);
-        while (ite != NULL) {
+        /* Iterator loop with remove pattern */
+        ite = list.iterator(&list);
+        while (ite->hasNext(ite)) {
             int* element = (int*) ite->get(ite);
-            // You can free() element if you have instanciated it with malloc()
+            /* You can free() element if you have instanciated it with malloc() */
             if (*element == 456) {
                 ite = ite->removeAndNext(ite);
             } else {
                 ite = ite->next(ite);
             }
         }
-    
+
         printf("\n");
-        for (Iterator* it = list.iterator(&list); it != NULL; it = it->next(it)) {
-            printf("%d\n", *(int*) it->get(it));
+        ite = list.iterator(&list);
+        for (; ite->hasNext(ite); ite = ite->next(ite)) {
+            printf("%d\n", *(int*) ite->get(ite));
         }
-    
+
         return 0;
     }
 

@@ -35,6 +35,7 @@ struct Iterator {
 	/**
 	 * Methods
 	 */
+	int (*hasNext) (Iterator* iterator);
 	void* (*get) (Iterator* iterator);
 	Iterator* (*next) (Iterator* iterator);
 	Iterator* (*removeAndNext) (Iterator* iterator);
@@ -70,6 +71,14 @@ struct List {
 	void (*removeAndFreeAll) (List* list);
 	Iterator* (*iterator) (List* list);
 };
+
+/**
+ * If there's next element
+ *
+ * @param iterator		Current iterator
+ * @return 				1 if there's next element, 0 otherwise
+ */
+int Iterator_has_next(Iterator* iterator);
 
 
 /**

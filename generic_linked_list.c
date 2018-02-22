@@ -9,6 +9,12 @@ void* Iterator_get(Iterator* iterator) {
 
 
 
+int Iterator_has_next(Iterator* iterator) {
+	return iterator->_nextIterator != NULL;
+}
+
+
+
 Iterator* Iterator_next(Iterator* iterator) {
 	return iterator->_nextIterator;
 }
@@ -16,15 +22,15 @@ Iterator* Iterator_next(Iterator* iterator) {
 
 
 Iterator* Iterator_remove_and_next(Iterator* iterator) {
+	/* Prepare result */
+	Iterator* nextIterator = iterator->_nextIterator;
+
 	--iterator->_parentList->_nb;
 
 	/* Attach previous and next nodes */
 	if (iterator->_previousIterator != NULL && iterator->_nextIterator != NULL) {
 		iterator->_previousIterator->_nextIterator = iterator->_nextIterator;
 	}
-	
-	/* Prepare result */
-	Iterator* nextIterator = iterator->_nextIterator;
 
 	/* Deleting iterator: */
 	free(iterator);
@@ -61,13 +67,14 @@ size_t List_size(List* list) {
 
 
 void* List_get_element(List* list, unsigned int index) {
+	Iterator* iterator = list->_firstIterator;
+	unsigned int i = 0;
+
+	/* Checking range */
 	if (list->_nb == 0 || index > list->_nb - 1) {
 		return NULL;
 	}
-	
-	Iterator* iterator = list->_firstIterator;
 		
-	unsigned int i = 0;
 	for (; i < index; i++) {
 		iterator = iterator->_nextIterator;
 	}
@@ -90,6 +97,7 @@ int List_add_element(List* list, void* element) {
 	newIterator->_nextIterator = NULL;
 	newIterator->_previousIterator = NULL;
 	newIterator->_parentList = list;
+	newIterator->hasNext = Iterator_has_next;
 	newIterator->get = Iterator_get;
 	newIterator->next = Iterator_next;
 	newIterator->removeAndNext = Iterator_remove_and_next;
@@ -114,13 +122,14 @@ int List_add_element(List* list, void* element) {
 
 
 int List_update_element(List* list, unsigned int index, void* element) {
+	Iterator* iterator = list->_firstIterator;
+	unsigned int i = 0;
+
+	/* Checking range */
 	if (list->_nb == 0 || index > list->_nb - 1) {
 		return 0;
 	}
-	
-	Iterator* iterator = list->_firstIterator;
 		
-	unsigned int i = 0;
 	for (; i < index; i++) {
 		iterator = iterator->_nextIterator;
 	}
@@ -134,19 +143,21 @@ int List_update_element(List* list, unsigned int index, void* element) {
 
 
  void* List_remove_element(List* list, unsigned int index) {
+	Iterator* iterator = list->_firstIterator;
+	unsigned int i = 0;
+	void* removedElement = NULL;
+
+	/* Checking range */
 	if (list->_nb == 0 || index > list->_nb - 1) {
 		return NULL;
 	}
 	
-	Iterator* iterator = list->_firstIterator;
-	
-	unsigned int i = 0;
 	for (; i < index; i++) {
 		iterator = iterator->_nextIterator;
 	}
 	
 	/* Prepare result */
-	void* removedElement = iterator->_element;
+	removedElement = iterator->_element;
 	
 	/* Deleting iterator (decrementation is done in removeAndNext): */
 	iterator->removeAndNext(iterator);
@@ -202,7 +213,16 @@ void List_remove_and_free_all(List* list) {
 }
 
 
+int Iterator_emptyIterator_has_next() {
+	return 0;
+}
+
+
 
 Iterator* List_iterator(List* list) {
-	return list->_firstIterator;
+	static Iterator emptyIterator = {
+		NULL, NULL, NULL, NULL, Iterator_emptyIterator_has_next, NULL, NULL, NULL
+	};
+
+	return (list->_firstIterator != NULL) ? list->_firstIterator : &emptyIterator;
 }
