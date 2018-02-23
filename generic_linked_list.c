@@ -3,60 +3,47 @@
 #include <stdlib.h>
 
 
-void* Iterator_get(Iterator* iterator) {
-	return iterator->_element;
+
+int Iterator_hasNext(Iterator* iterator) {
+	return iterator->_container != NULL;
 }
 
 
 
-int Iterator_has_next(Iterator* iterator) {
-	return iterator->_nextIterator != NULL;
+void* Iterator_next(Iterator* iterator) {
+	void* element = iterator->_container->_element;
+	iterator->_containerToRemove = iterator->_container;
+	iterator->_container = iterator->_container->_nextContainer;
+	return element;
 }
 
 
 
-Iterator* Iterator_next(Iterator* iterator) {
-	return iterator->_nextIterator;
-}
+void Iterator_remove(Iterator* iterator) {
+	/* If current function called once, iterator->_containerToRemove should never be NULL */
+	/* This conditional block secures from multiple iterator->remove() calls */
+	if (iterator->_containerToRemove != NULL) {
+		--iterator->_parentList->_nb;
 
+		if (iterator->_containerToRemove->_previousContainer == NULL) {
+			/* Case : Removing the first element (index 0) */
 
+			/* Test if there's an element after the element to remove */
+			if (iterator->_container != NULL) {
+				iterator->_container->_previousContainer = NULL;
+			}
 
-Iterator* Iterator_remove_and_next(Iterator* iterator) {
-	Iterator* nextIterator = NULL;
-	--iterator->_parentList->_nb;
+			iterator->_parentList->_firstContainer = iterator->_container;
+		} else {
+			/* Case : There's element before current element */
+			/* Attach previous and next nodes (iterator->_container can be NULL if iterator->_containerToRemove was the last in the list) */
+			iterator->_containerToRemove->_previousContainer->_nextContainer = iterator->_container;
+		}
 
-	/* Attach previous and next nodes */
-	if (iterator->_previousIterator != NULL && iterator->_nextIterator != NULL) {
-		iterator->_previousIterator->_nextIterator = iterator->_nextIterator;
+		/* Deleting container */
+		free(iterator->_containerToRemove);
+		iterator->_containerToRemove = NULL;
 	}
-
-	/* Prepare result */
-	nextIterator = iterator->_nextIterator;
-
-	/* Deleting iterator: */
-	free(iterator);
-
-	return nextIterator;
-}
-
-
-
-List List_make(){
-	List list = {
-		0,
-		NULL,
-		NULL,
-		List_size,
-		List_get_element,
-		List_add_element,
-		List_update_element,
-		List_remove_element,
-		List_remove_all,
-		List_remove_and_free_all,
-		List_iterator
-	};
-	
-	return list;
 }
 
 
@@ -67,8 +54,8 @@ size_t List_size(List* list) {
 
 
 
-void* List_get_element(List* list, unsigned int index) {
-	Iterator* iterator = list->_firstIterator;
+void* List_get(List* list, unsigned int index) {
+	LinkedContainer* container = list->_firstContainer;
 	unsigned int i = 0;
 
 	/* Checking range */
@@ -77,42 +64,37 @@ void* List_get_element(List* list, unsigned int index) {
 	}
 		
 	for (; i < index; i++) {
-		iterator = iterator->_nextIterator;
+		container = container->_nextContainer;
 	}
 	
-	return iterator->_element;
+	return container->_element;
 }
 
 
 
-int List_add_element(List* list, void* element) {
-	Iterator* newIterator = (Iterator*) malloc(sizeof(*newIterator));
+int List_add(List* list, void* element) {
+	LinkedContainer* newContainer = (LinkedContainer*) malloc(sizeof(*newContainer));
 	
 	/* If malloc failed */
-	if(newIterator == NULL) {
+	if(newContainer == NULL) {
 		return 0;
 	}
 
-	/* Init iterator fields */
-	newIterator->_element = element;
-	newIterator->_nextIterator = NULL;
-	newIterator->_previousIterator = NULL;
-	newIterator->_parentList = list;
-	newIterator->hasNext = Iterator_has_next;
-	newIterator->get = Iterator_get;
-	newIterator->next = Iterator_next;
-	newIterator->removeAndNext = Iterator_remove_and_next;
+	/* Init container's fields */
+	newContainer->_element = element;
+	newContainer->_nextContainer = NULL;
+	newContainer->_previousContainer = NULL;
 
 	/* If we don't have any element in the list */
 	if(list->_nb == 0) {
-		list->_firstIterator = newIterator;
-		list->_lastIterator = newIterator;
+		list->_firstContainer = newContainer;
+		list->_lastContainer = newContainer;
 	}
 	/* Else (there's already element(s) in the list) */
 	else {
-		newIterator->_previousIterator = list->_lastIterator;
-		list->_lastIterator->_nextIterator = newIterator;
-		list->_lastIterator = newIterator;
+		newContainer->_previousContainer = list->_lastContainer;
+		list->_lastContainer->_nextContainer = newContainer;
+		list->_lastContainer = newContainer;
 	}
 	
 	list->_nb = list->_nb + 1;
@@ -122,8 +104,8 @@ int List_add_element(List* list, void* element) {
 
 
 
-int List_update_element(List* list, unsigned int index, void* element) {
-	Iterator* iterator = list->_firstIterator;
+int List_update(List* list, unsigned int index, void* element) {
+	LinkedContainer* container = list->_firstContainer;
 	unsigned int i = 0;
 
 	/* Checking range */
@@ -132,21 +114,22 @@ int List_update_element(List* list, unsigned int index, void* element) {
 	}
 		
 	for (; i < index; i++) {
-		iterator = iterator->_nextIterator;
+		container = container->_nextContainer;
 	}
 	
 	/* Overwrite element: */
-	iterator->_element = element;
+	container->_element = element;
 	
 	return 1;
 }
 
 
 
- void* List_remove_element(List* list, unsigned int index) {
-	Iterator* iterator = list->_firstIterator;
+void* List_remove(List* list, unsigned int index) {
+	LinkedContainer* containerToFree = list->_firstContainer;
 	unsigned int i = 0;
 	void* removedElement = NULL;
+	Iterator iterator;
 
 	/* Checking range */
 	if (list->_nb == 0 || index > list->_nb - 1) {
@@ -154,33 +137,36 @@ int List_update_element(List* list, unsigned int index, void* element) {
 	}
 	
 	for (; i < index; i++) {
-		iterator = iterator->_nextIterator;
+		containerToFree = containerToFree->_nextContainer;
 	}
 	
 	/* Prepare result */
-	removedElement = iterator->_element;
+	removedElement = containerToFree->_element;
 	
-	/* Deleting iterator (decrementation is done in removeAndNext): */
-	iterator->removeAndNext(iterator);
+	/* Deleting container and decrementing list size done in Iterator_remove() : */
+	iterator._containerToRemove = containerToFree;
+	iterator._container = containerToFree->_nextContainer;
+	iterator._parentList = list;
+	Iterator_remove(&iterator);
 	
 	return removedElement;
 }
 
 
 
-void List_remove_all(List* list) {
+void List_removeAll(List* list) {
 	if (list->_nb != 0) {
-		Iterator* currentIterator = list->_firstIterator;
+		LinkedContainer* currentContainer = list->_firstContainer;
 			
 		unsigned int i = 0;
 		for (; i < list->_nb; i++) {
-			Iterator* iteratorToFree = currentIterator;
+			LinkedContainer* containerToFree = currentContainer;
 			
-			/* Update iterator's reference */
-			currentIterator = currentIterator->_nextIterator;
+			/* Update container's reference */
+			currentContainer = currentContainer->_nextContainer;
 			
 			/* Free iterator */
-			free(iteratorToFree);
+			free(containerToFree);
 		}
 	}
 	
@@ -190,22 +176,22 @@ void List_remove_all(List* list) {
 
 
 
-void List_remove_and_free_all(List* list) {
+void List_removeAndFreeAll(List* list) {
 	if (list->_nb != 0) {
-		Iterator* currentIterator = list->_firstIterator;
+		LinkedContainer* currentContainer = list->_firstContainer;
 			
 		unsigned int i = 0;
 		for (; i < list->_nb; i++) {
-			Iterator* iteratorToFree = currentIterator;
+			LinkedContainer* containerToFree = currentContainer;
 			
-			/* Update iterator's reference */
-			currentIterator = currentIterator->_nextIterator;
+			/* Update container's reference */
+			currentContainer = currentContainer->_nextContainer;
 			
 			/* Free element */
-			free(iteratorToFree->_element);
+			free(containerToFree->_element);
 			
-			/* Free iterator */
-			free(iteratorToFree);
+			/* Free container */
+			free(containerToFree);
 		}
 	}
 	
@@ -214,16 +200,48 @@ void List_remove_and_free_all(List* list) {
 }
 
 
-int Iterator_emptyIterator_has_next() {
+
+int Iterator_emptyIterator_hasNext() {
 	return 0;
 }
 
 
 
-Iterator* List_iterator(List* list) {
+Iterator List_iterator(List* list) {
 	static Iterator emptyIterator = {
-		NULL, NULL, NULL, NULL, Iterator_emptyIterator_has_next, NULL, NULL, NULL
+		NULL, NULL, NULL, Iterator_emptyIterator_hasNext, NULL, NULL
 	};
 
-	return (list->_firstIterator != NULL) ? list->_firstIterator : &emptyIterator;
+	if (list->_firstContainer != NULL) {
+		Iterator iterator;
+		iterator._parentList = list;
+		iterator._container = list->_firstContainer;
+		iterator._containerToRemove = NULL;
+		iterator.hasNext = Iterator_hasNext;
+		iterator.next = Iterator_next;
+		iterator.remove = Iterator_remove;
+		return iterator;
+	}
+
+	return emptyIterator;
+}
+
+
+
+List List_LinkedList(){
+	List list = {
+		0,
+		NULL,
+		NULL,
+		List_size,
+		List_get,
+		List_add,
+		List_update,
+		List_remove,
+		List_removeAll,
+		List_removeAndFreeAll,
+		List_iterator
+	};
+	
+	return list;
 }
