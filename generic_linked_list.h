@@ -95,17 +95,19 @@ struct List {
 	 * Number of elements in the list, 0 if the list is empty
 	 */
 	size_t _nb;
-	
+
+
 	/**
 	 * First element in the list, useful for browsing elements from there
 	 */
 	LinkedContainer* _firstContainer;
-	
+
+
 	/**
 	 * Last element in the list, useful for adding elements from there (and don't looping from the first element)
 	 */
 	LinkedContainer* _lastContainer;
-	
+
 
 	/**
 	* List's size (number of elements in the list)
@@ -170,9 +172,10 @@ struct List {
 	/**
 	* Remove all list elements (containers) in the list, and also free() the elements
 	*
-	* @param list		This list
+	* @param list						This list
+	* @param freeElementCallback		Optional callback is executed before `free()` on the element. Use NULL if you don't have a callback.
 	*/
-	void (*removeAndFreeAll) (List* list);
+	void (*removeAndFreeAll) (List* list, void (*freeElementCallback)(void* element));
 
 
 	/**

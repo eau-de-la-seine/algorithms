@@ -176,7 +176,7 @@ void List_removeAll(List* list) {
 
 
 
-void List_removeAndFreeAll(List* list) {
+void List_removeAndFreeAll(List* list, void (*freeElementCallback)(void* element)) {
 	if (list->_nb != 0) {
 		LinkedContainer* currentContainer = list->_firstContainer;
 			
@@ -186,6 +186,11 @@ void List_removeAndFreeAll(List* list) {
 			
 			/* Update container's reference */
 			currentContainer = currentContainer->_nextContainer;
+
+			/* Free element content */
+			if (freeElementCallback != NULL) {
+				freeElementCallback(containerToFree->_element);
+			}
 			
 			/* Free element */
 			free(containerToFree->_element);
