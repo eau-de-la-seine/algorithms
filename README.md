@@ -36,9 +36,9 @@ Some functions and libraries I have created myself during my studies
 ### Generic Linked List
 
 
-#include "../generic_linked_list.h"
-#include <stdio.h>
-#include <stdlib.h>
+    #include "../generic_linked_list.h"
+    #include <stdio.h>
+    #include <stdlib.h>
 
     int main(void) {
         List list = List_LinkedList();
