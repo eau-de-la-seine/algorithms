@@ -189,7 +189,6 @@ struct List {
 
 
 
-
 /**
  * Make a new linked list
  * This implementation is not threadsafe
@@ -197,6 +196,24 @@ struct List {
  * @return 			The new linked list
  */
 List List_LinkedList();
+
+
+
+/**
+ * Interface functions, you can also use those functions if you don't want to do OOP or avoid dereferencing.
+ */
+int Iterator_hasNext(Iterator* iterator);
+void* Iterator_next(Iterator* iterator);
+void Iterator_remove(Iterator* iterator);
+
+size_t List_size(List* list);
+void* List_get(List* list, unsigned int index);
+int List_add(List* list, void* element);
+int List_update(List* list, unsigned int index, void* element);
+void* List_remove(List* list, unsigned int index);
+void List_removeAll(List* list);
+void List_removeAndFreeAll(List* list, void (*freeElementCallback)(void* element));
+Iterator List_iterator(List* list);
 
 
 #endif

@@ -233,7 +233,7 @@ Iterator List_iterator(List* list) {
 
 
 
-List List_LinkedList(){
+List List_LinkedList() {
 	List list = {
 		0,
 		NULL,

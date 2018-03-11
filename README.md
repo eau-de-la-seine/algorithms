@@ -179,5 +179,5 @@ Some functions and libraries I have created myself during my studies
 
 Compiled with:
 
-    gcc -Wall -Wextra -ansi -pedantic -fsanitize=leak -fno-omit-frame-pointer ../generic_linked_list.c main.c -o list
+    gcc -Wall -Wextra -ansi -pedantic -fsanitize=leak -fno-omit-frame-pointer -std=c89 ../generic_linked_list.c main.c -o list
 
