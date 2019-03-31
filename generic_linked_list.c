@@ -21,29 +21,30 @@ void* Iterator_next(Iterator* iterator) {
 
 void Iterator_remove(Iterator* iterator) {
 	/* If current function called once, iterator->_containerToRemove should never be NULL */
-	/* This conditional block secures from multiple iterator->remove() calls */
-	if (iterator->_containerToRemove != NULL) {
-		--iterator->_parentList->_nb;
+	if (iterator->_containerToRemove == NULL) {
+		return;
+	}
 
-		if (iterator->_containerToRemove->_previousContainer == NULL) {
-			/* Case : Removing the first element (index 0) */
+	--iterator->_parentList->_nb;
 
-			/* Test if there's an element after the element to remove */
-			if (iterator->_container != NULL) {
-				iterator->_container->_previousContainer = NULL;
-			}
+	if (iterator->_containerToRemove->_previousContainer == NULL) {
+		/* Case : Removing the first element (index 0) */
 
-			iterator->_parentList->_firstContainer = iterator->_container;
-		} else {
-			/* Case : There's element before current element */
-			/* Attach previous and next nodes (iterator->_container can be NULL if iterator->_containerToRemove was the last in the list) */
-			iterator->_containerToRemove->_previousContainer->_nextContainer = iterator->_container;
+		/* Test if there's an element after the element to remove */
+		if (iterator->_container != NULL) {
+			iterator->_container->_previousContainer = NULL;
 		}
 
-		/* Deleting container */
-		free(iterator->_containerToRemove);
-		iterator->_containerToRemove = NULL;
+		iterator->_parentList->_firstContainer = iterator->_container;
+	} else {
+		/* Case : There's element before current element */
+		/* Attach previous and next nodes (iterator->_container can be NULL if iterator->_containerToRemove was the last in the list) */
+		iterator->_containerToRemove->_previousContainer->_nextContainer = iterator->_container;
 	}
+
+	/* Deleting container */
+	free(iterator->_containerToRemove);
+	iterator->_containerToRemove = NULL;
 }
 
 
@@ -62,11 +63,11 @@ void* List_get(List* list, unsigned int index) {
 	if (list->_nb == 0 || index > list->_nb - 1) {
 		return NULL;
 	}
-		
+
 	for (; i < index; i++) {
 		container = container->_nextContainer;
 	}
-	
+
 	return container->_element;
 }
 
@@ -74,9 +75,9 @@ void* List_get(List* list, unsigned int index) {
 
 int List_add(List* list, void* element) {
 	LinkedContainer* newContainer = (LinkedContainer*) malloc(sizeof(*newContainer));
-	
+
 	/* If malloc failed */
-	if(newContainer == NULL) {
+	if (newContainer == NULL) {
 		return 0;
 	}
 
@@ -86,7 +87,7 @@ int List_add(List* list, void* element) {
 	newContainer->_previousContainer = NULL;
 
 	/* If we don't have any element in the list */
-	if(list->_nb == 0) {
+	if (list->_nb == 0) {
 		list->_firstContainer = newContainer;
 		list->_lastContainer = newContainer;
 	}
@@ -96,9 +97,9 @@ int List_add(List* list, void* element) {
 		list->_lastContainer->_nextContainer = newContainer;
 		list->_lastContainer = newContainer;
 	}
-	
+
 	list->_nb = list->_nb + 1;
-	
+
 	return 1;
 }
 
@@ -155,21 +156,23 @@ void* List_remove(List* list, unsigned int index) {
 
 
 void List_removeAll(List* list) {
-	if (list->_nb != 0) {
-		LinkedContainer* currentContainer = list->_firstContainer;
-			
-		unsigned int i = 0;
-		for (; i < list->_nb; i++) {
-			LinkedContainer* containerToFree = currentContainer;
-			
-			/* Update container's reference */
-			currentContainer = currentContainer->_nextContainer;
-			
-			/* Free iterator */
-			free(containerToFree);
-		}
+	if (list->_nb == 0) {
+		return;
 	}
-	
+
+	LinkedContainer* currentContainer = list->_firstContainer;
+
+	unsigned int i = 0;
+	for (; i < list->_nb; i++) {
+		LinkedContainer* containerToFree = currentContainer;
+
+		/* Update container's reference */
+		currentContainer = currentContainer->_nextContainer;
+
+		/* Free iterator */
+		free(containerToFree);
+	}
+
 	/* Reset list size */
 	list->_nb = 0;
 }
@@ -177,29 +180,31 @@ void List_removeAll(List* list) {
 
 
 void List_removeAndFreeAll(List* list, void (*freeElementCallback)(void* element)) {
-	if (list->_nb != 0) {
-		LinkedContainer* currentContainer = list->_firstContainer;
-			
-		unsigned int i = 0;
-		for (; i < list->_nb; i++) {
-			LinkedContainer* containerToFree = currentContainer;
-			
-			/* Update container's reference */
-			currentContainer = currentContainer->_nextContainer;
-
-			/* Free element content */
-			if (freeElementCallback != NULL) {
-				freeElementCallback(containerToFree->_element);
-			}
-			
-			/* Free element */
-			free(containerToFree->_element);
-			
-			/* Free container */
-			free(containerToFree);
-		}
+	if (list->_nb == 0) {
+		return;
 	}
-	
+
+	LinkedContainer* currentContainer = list->_firstContainer;
+		
+	unsigned int i = 0;
+	for (; i < list->_nb; i++) {
+		LinkedContainer* containerToFree = currentContainer;
+
+		/* Update container's reference */
+		currentContainer = currentContainer->_nextContainer;
+
+		/* Free element content */
+		if (freeElementCallback != NULL) {
+			freeElementCallback(containerToFree->_element);
+		}
+
+		/* Free element */
+		free(containerToFree->_element);
+
+		/* Free container */
+		free(containerToFree);
+	}
+
 	/* Reset list size */
 	list->_nb = 0;
 }
