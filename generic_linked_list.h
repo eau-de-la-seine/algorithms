@@ -48,7 +48,7 @@ struct Iterator {
 	LinkedContainer* _container;
 
 	/**
-	 * Reprensents the cursor on the previous element which is mostly required for the last element in the list
+	 * Reprensents the cursor on the element after "Iterator_next()" has been called, it allows you to remove the element of the current iteration
 	 */
 	LinkedContainer* _containerToRemove;
 

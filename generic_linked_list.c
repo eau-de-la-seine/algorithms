@@ -27,18 +27,19 @@ void Iterator_remove(Iterator* iterator) {
 
 	--iterator->_parentList->_nb;
 
+	/* Case : Removing the first element (index 0) */
 	if (iterator->_containerToRemove->_previousContainer == NULL) {
-		/* Case : Removing the first element (index 0) */
 
-		/* Test if there's an element after the element to remove */
+		/* Test if there's an element after the element to remove. (Note: iterator->_container equals iterator->_containerToRemove->_nextContainer) */
 		if (iterator->_container != NULL) {
 			iterator->_container->_previousContainer = NULL;
 		}
 
 		iterator->_parentList->_firstContainer = iterator->_container;
-	} else {
-		/* Case : There's element before current element */
-		/* Attach previous and next nodes (iterator->_container can be NULL if iterator->_containerToRemove was the last in the list) */
+	}
+	/* Case : There's element before current element */
+	else {
+		/* Attach previous and next nodes (Note: iterator->_container can be NULL if iterator->_containerToRemove was the last in the list) */
 		iterator->_containerToRemove->_previousContainer->_nextContainer = iterator->_container;
 	}
 
@@ -156,13 +157,15 @@ void* List_remove(List* list, unsigned int index) {
 
 
 void List_removeAll(List* list) {
+	LinkedContainer* currentContainer = NULL;
+	unsigned int i = 0;
+
 	if (list->_nb == 0) {
 		return;
 	}
 
-	LinkedContainer* currentContainer = list->_firstContainer;
+	currentContainer = list->_firstContainer;
 
-	unsigned int i = 0;
 	for (; i < list->_nb; i++) {
 		LinkedContainer* containerToFree = currentContainer;
 
@@ -180,13 +183,15 @@ void List_removeAll(List* list) {
 
 
 void List_removeAndFreeAll(List* list, void (*freeElementCallback)(void* element)) {
+	LinkedContainer* currentContainer = NULL;
+	unsigned int i = 0;
+
 	if (list->_nb == 0) {
 		return;
 	}
 
-	LinkedContainer* currentContainer = list->_firstContainer;
-		
-	unsigned int i = 0;
+	currentContainer = list->_firstContainer;
+
 	for (; i < list->_nb; i++) {
 		LinkedContainer* containerToFree = currentContainer;
 
